@@ -1,4 +1,5 @@
 const express = require("express");
+const Joi = require("joi"); //Returns a Class
 const app = express();
 
 //Envirnonmental Variables
@@ -18,7 +19,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/courses", (req, res) => {
-  res.send([1, 2, 3, 4]);
+  res.send(courses);
 });
 
 //parameters uses :id routes
@@ -34,14 +35,68 @@ app.get("/api/courses/:id", (req, res) => {
 
 //Post Method
 app.post("/api/courses", (req, res) => {
+  const schema = {
+    id: Joi.number().required(),
+    course: Joi.string()
+      .min(3)
+      .required()
+  };
+
+  const { error, value } = Joi.validate(req.body, schema);
+
+  if (error) {
+    return res.status(404).send(`Bad Reequest ${error}`);
+  }
   const coureToBeAdded = {
     id: courses.length + 1,
-    name: req.body.name
+    course: req.body.course
   };
+
   courses.push(coureToBeAdded);
   res.send(`Course added to Id ${coureToBeAdded.id}`);
+});
+
+//Update  The Course  -- Put method
+
+app.put("/api/courses/:id", (req, res) => {
+  let index = parseInt(req.params.id);
+  let result = courses.findIndex(course => {
+    return course.id === index;
+  });
+  console.log(result);
+  if (result === -1) return res.status(404).send("No Such Course");
+
+  let { error, value } = validate(req);
+  if (error) return res.status(400).send("Bad Request" + error);
+  courses[result].course = req.body.course;
+  res.send(
+    "Updated course at " + courses[result].id + " is " + courses[result].course
+  );
+});
+
+app.delete("/api/courses/:id", (req, res) => {
+  let index = parseInt(req.body.id);
+  let result = courses.findIndex(course => {
+    return course.id === index;
+  });
+  console.log(result);
+  if (result < 0) {
+    return res.status(404).send("No such course in the Database AVAIALABLE");
+  }
+  courses.splice(result, 1);
+  res.send(courses);
 });
 
 app.listen(_PORT, () => {
   console.log(`Listening to Port ${_PORT}`);
 });
+
+function validate(request) {
+  const schema = {
+    id: Joi.number().required(),
+    course: Joi.string()
+      .min(3)
+      .required()
+  };
+  return Joi.validate(request.body, schema);
+}
