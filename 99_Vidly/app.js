@@ -1,10 +1,10 @@
-const express = require("express");
-const Joi = require("joi");
+const express = require("express"); //Function
+const Joi = require("joi"); // Class
 const app = express();
 
 const _PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+app.use(express.json()); //To accept JSON Transaction
 
 __movies = [
   { id: 1, name: "ABC", genre: "Action" },
